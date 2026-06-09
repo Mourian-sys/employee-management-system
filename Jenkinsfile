@@ -1,45 +1,59 @@
 pipeline {
 
-    agent any
+```
+agent any
 
-    stages {
+stages {
 
-        stage('Checkout') {
-            steps {
-                checkout scm
-            }
+    stage('Checkout') {
+        steps {
+            checkout scm
         }
+    }
 
-        stage('Install Dependencies') {
-            steps {
-                sh 'pip3 install -r backend/requirements.txt'
-            }
+    stage('Install Dependencies') {
+        steps {
+            sh 'python3 -m pip install --user -r backend/requirements.txt'
         }
+    }
 
-        stage('Run Tests') {
-            steps {
-                sh 'cd backend && pytest tests'
-            }
+    stage('Run Tests') {
+        steps {
+            sh 'cd backend && python3 -m pytest tests'
         }
+    }
 
-        stage('Build Docker Image') {
-            steps {
-                sh 'docker build -t employee-app .'
-            }
+    stage('Build Docker Image') {
+        steps {
+            sh 'docker build -t employee-app .'
         }
+    }
 
-        stage('Deploy') {
-            steps {
-                sh '''
-                docker stop employee-app || true
-                docker rm employee-app || true
+    stage('Deploy') {
+        steps {
+            sh '''
+            docker stop employee-app || true
+            docker rm employee-app || true
 
-                docker run -d \
-                --name employee-app \
-                -p 5000:5000 \
-                employee-app
-                '''
-            }
+            docker run -d \
+              --name employee-app \
+              -p 5000:5000 \
+              employee-app
+            '''
         }
     }
 }
+
+post {
+    success {
+        echo 'Deployment Successful'
+    }
+
+    failure {
+        echo 'Deployment Failed'
+    }
+}
+```
+
+}
+
